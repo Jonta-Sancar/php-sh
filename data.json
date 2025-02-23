@@ -1,0 +1,12 @@
+{
+  "name": "PHP Internal Server Helper Development Environment",
+  "version": "0.4.0",
+  "description": "This scripts works to simplify the development environment for PHP Internal Server.",
+  "author": "Jonta Sancar <jontasancar@gmail.com>",
+  "news": "",
+  "dafault-values": {
+    "dir": "C:/xampp/htdocs",
+    "host": "localhost",
+    "port": "80"
+  }
+}
