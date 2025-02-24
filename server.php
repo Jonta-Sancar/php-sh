@@ -22,10 +22,10 @@ while (!is_dir($request_dir) && strlen($request_dir) > 1) {
 
 // 2. Lista o conteúdo do diretório, se ele existir
 if (is_dir($request_dir)) {
-    echo "<strong>Conteúdo do diretório: {$request_dir}</strong><br>";
+    echo "<h2 style=\"margin: 0; padding: 0;\">Conteúdo do diretório: {$request_dir}</h2><br>";
     $dir_contents = scandir($request_dir);
 
-    echo "<ul>";
+    echo "<ul style=\"list-style: none; padding: 0px 20px; margin: 0;\">";
     foreach ($dir_contents as $content_name) {
         // Ignora arquivos/diretórios ocultos (que começam com '.')
         if (substr($content_name, 0, 1) === '.') {
@@ -37,8 +37,16 @@ if (is_dir($request_dir)) {
 
         // Remove o DOCUMENT_ROOT para criar um link relativo
         $link = str_replace($DOCUMENT_ROOT, '', $fullPath);
+        
+        $id_dir = is_dir($fullPath);
+        $svg = file_get_contents(__DIR__ . "/assets/svg/" . ($id_dir ? 'folder.svg' : 'file.svg'));
+        $color = $id_dir ? '#c0ba00' : '#6d6d6d';
 
-        echo "<li><a href=\"{$link}\">{$content_name}</a></li>";
+        $svg = str_replace('fill="#e8eaed"', 'fill="' . $color . '"', $svg);
+        echo "<li style=\"display: flex; align-items: center; gap: 10px;\">
+            ". $svg ."
+            <a href=\"{$link}\">{$content_name}</a>
+        </li>";
     }
     echo "</ul>";
 } else {
