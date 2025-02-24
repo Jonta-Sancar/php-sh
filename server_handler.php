@@ -30,6 +30,10 @@ $FLAGS = [
     '--list' => [
         'content' => false,
         'description' => "shows all active servers"
+    ],
+    '--dir' => [
+        'content' => true,
+        'description' => "sets the current directory"
     ]
 ];
 
@@ -40,14 +44,17 @@ $SIMPLE_FLAGS = [
     '-v',
     '-h',
     '-f',
-    '-l'
+    '-l',
+    '-d'
 ];
 
 $parammeters = json_decode(file_get_contents(__DIR__ . '/php-sh.json'), true);
 
 $command_line = "php " . implode(' ', $argv);
 
+
 adjustParammeters();
+
 $PACKAGE_DIR = __DIR__;
 $PACKAGE_INFO  = json_decode(file_get_contents(__DIR__ . '/data.json'), true);
 

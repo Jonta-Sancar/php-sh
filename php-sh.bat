@@ -8,4 +8,4 @@ set "HANDLER_PATH=%BAT_DIR%\server_handler.php"
 
 set "args=%*"
 
-php "%HANDLER_PATH%" !args!
+php "%HANDLER_PATH%" "-d" "%CD%" !args!
