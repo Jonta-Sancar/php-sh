@@ -1,55 +1,65 @@
-# GET STARTEd
+# GET STARTED
 
-## base code
+## install
+You need to have installed PHP 8.1 or higher. Having this, you can install this package as a zip file and add it to your projects folder.
+After that, you can add the uncompressed folder to your environment variables.
+
+## usage
 start server with default values
 - ex:
 ```cmd
- phps --server-helper
-```
-- ex:
-```cmd
- phps -SH
+ php-sh
 ```
 
 start server with specific directory
 - ex:
 ```cmd
- phps --server-helper <directory>
-```
-or:
-```cmd
- phps -SH <directory>
+ php-sh <directory>
 ```
 
-## flags
+### flags
 ### `--break` or `-b`
-stop all php processes
+if you use just the flag, this flag will break all servers, otherwise, if you set specifics ports, it will break only specific server
 ```cmd
- phps -SH --break
+ php-sh --break
 ```
 or:
 ```cmd
- phps -SH -b
+ php-sh -b
+```
+can you set ports to break:
+```cmd
+ php-sh --break <ports>
+```
+for example:
+```cmd
+ php-sh --break 3000 5050 8080
 ```
 
-### `--host` or `-h`
+### `--host` or `-ht`
 if you want to start server in specific ip address, for example:
 ```cmd
- phps -SH --host 192.168.1.1
+ php-sh --host 192.168.1.1
 ```
 or:
 ```cmd
- phps -SH -h 192.168.1.1
+ php-sh -h 192.168.1.1
 ```
 
 ### `--port` or `-p`
 if you want to start server in specific port, for example:
 ```cmd
- phps -SH --port 300
+ php-sh --port 300
 ```
 or:
 ```cmd
- phps -SH -p 300
+ php-sh -p 300
+```
+
+### `--list` or `-l`
+if you want to list all servers that are running:
+```cmd
+ phps --list
 ```
 
 ### `--version` or `-v`
