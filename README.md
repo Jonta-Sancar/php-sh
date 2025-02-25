@@ -59,25 +59,25 @@ or:
 ### `--list` or `-l`
 if you want to list all servers that are running:
 ```cmd
- phps --list
+ php-sh --list
 ```
 
 ### `--version` or `-v`
 show version of this package and what is new:
 ```cmd
- phps --version
+ php-sh --version
 ```
 or:
 ```cmd
- phps -v
+ php-sh -v
 ```
 
 ### `--help` or `-h`
 this flags helps you to understand what this script can do:
 ```cmd
- phps --help
+ php-sh --help
 ```
 or:
 ```cmd
- phps -h
+ php-sh -h
 ```
