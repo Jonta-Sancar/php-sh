@@ -1,4 +1,4 @@
-# GET STARTED
+# PHP - Simple Host
 
 ## install
 You need to have installed PHP 8.1 or higher. Having this, you can install this package as a zip file and add it to your projects folder.
