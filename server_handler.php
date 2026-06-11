@@ -89,7 +89,8 @@ function stopServer(){
     global $parammeters, $argv, $FLAGS;
     echo "Verificando se há processos para encerrar.\n";
 
-    stopProcess('php.exe', isset($argv[array_keys($FLAGS)[0]]), $parammeters['port']);
+    $task = isWindows() ? 'php.exe' : 'php';
+    stopProcess($task, isset($argv[array_keys($FLAGS)[0]]), $parammeters['port']);
 }
 
 /**
@@ -125,7 +126,8 @@ function startServer(){
 }
 
 function listServers(){
-    $processos = returnsProcessos('php.exe');
+    $task = isWindows() ? 'php.exe' : 'php';
+    $processos = returnsProcessos($task);
     showProcess($processos);
     echo "\n";
 }

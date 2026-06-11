@@ -2,23 +2,30 @@
 
 function startProcess($HOST, $PORT, $DIR){
   global $PACKAGE_DIR;
-  $command_line = "php -S $HOST:$PORT -t $DIR $PACKAGE_DIR/server.php";
 
-  $tempFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'run_php_hidden.vbs';
+  if(isWindows()){
+    $command_line = "php -S $HOST:$PORT -t $DIR $PACKAGE_DIR/server.php";
 
-  $vbscript = <<<EOT
-      Set WshShell = CreateObject("WScript.Shell")
-      ' Inicia servidor PHP
-      WshShell.Run "$command_line", 0, False
-  EOT;
+    $tempFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'run_php_hidden.vbs';
 
-  if (file_put_contents($tempFile, $vbscript) === false) {
-    die("Erro ao criar o arquivo VBScript.");
+    $vbscript = <<<EOT
+        Set WshShell = CreateObject("WScript.Shell")
+        ' Inicia servidor PHP
+        WshShell.Run "$command_line", 0, False
+    EOT;
+
+    if (file_put_contents($tempFile, $vbscript) === false) {
+      die("Erro ao criar o arquivo VBScript.");
+    }
+
+    exec('wscript //nologo "' . $tempFile . '"');
+
+    unlink($tempFile);
+  } else {
+    $command_line = 'php -S ' . $HOST . ':' . $PORT . ' -t ' . escapeshellarg($DIR) . ' ' . escapeshellarg($PACKAGE_DIR . '/server.php');
+
+    exec($command_line . ' > /dev/null 2>&1 &');
   }
-
-  exec('wscript //nologo "' . $tempFile . '"');
-
-  unlink($tempFile);
 }
 
 function stopProcess($task, $is_break, $port_to_use){
@@ -52,6 +59,31 @@ function stopProcess($task, $is_break, $port_to_use){
 
 function returnsProcessos($task){
   global $FLAGS, $argv, $parammeters;
+
+  $phpProcesses = isWindows() ? returnsProcessosWindows($task) : returnsProcessosLinux();
+
+  foreach($phpProcesses as $index => $phpProcess){
+    $port = $phpProcess['port'];
+    $is_break = isset($argv[array_keys($FLAGS)[0]]);
+    $is_list  = isset($argv[array_keys($FLAGS)[6]]);
+    if($is_list){
+      break;
+    }
+
+    $condition_1 = !$is_break && ($port == @$argv['--port'] || $port == $parammeters['port']);
+    $condition_2 = $is_break && $port == @$argv['--port'];
+    $condition_3 = $is_break && @$argv['--port'] === null;
+
+    $final_condition = $condition_1 || $condition_2 || $condition_3;
+    if(!$final_condition){
+      unset($phpProcesses[$index]);
+    }
+  }
+
+  return array_values($phpProcesses);
+}
+
+function returnsProcessosWindows($task){
   $process = shell_exec('tasklist /FI "IMAGENAME eq '.$task.'" /NH /FO CSV');
   $processes = [];
   $lines = explode("\n", trim($process));
@@ -85,24 +117,34 @@ function returnsProcessos($task){
     }
   }
 
-  foreach($phpProcesses as $index => $phpProcess){
-    $processes[$phpProcess['pid']] = $phpProcess['name'];
-    $is_break = isset($argv[array_keys($FLAGS)[0]]);
-    $is_list  = isset($argv[array_keys($FLAGS)[6]]);
-    if($is_list){
-      break;
+  return $phpProcesses;
+}
+
+function returnsProcessosLinux(){
+  $output = shell_exec("ps -eo pid,command | grep -E '[p]hp .*-S'");
+  $phpProcesses = [];
+  $lines = explode("\n", trim((string) $output));
+  foreach ($lines as $line) {
+    $line = trim($line);
+    if($line === ''){
+      continue;
     }
-    
-    $condition_1 = !$is_break && ($port == @$argv['--port'] || $port == $parammeters['port']);
-    $condition_2 = $is_break && $port == @$argv['--port'];
-    $condition_3 = $is_break && @$argv['--port'] === null;
-    
-    $final_condition = $condition_1 || $condition_2 || $condition_3;
-    if(!$final_condition){
-      unset($processes[$index]);
+
+    if(!preg_match('/^(\d+)\s+(.*)$/', $line, $parts)){
+      continue;
     }
+
+    if(!preg_match('/-S\s+\S*:(\d+)/', $parts[2], $portMatch)){
+      continue;
+    }
+
+    $phpProcesses[] = [
+      'pid' => $parts[1],
+      'name' => 'php',
+      'port' => $portMatch[1]
+    ];
   }
-  
+
   return $phpProcesses;
 }
 
@@ -182,7 +224,7 @@ function preparePorts($ports){
   
   do{
     if(!is_array($ports)){
-      if(mb_strpos($ports, ' ') !== false){
+      if(strpos($ports, ' ') !== false){
         $ports = explode(' ', $ports);
       } else {
         $ports = $ports;
@@ -230,12 +272,20 @@ function ajdustDivider($string, $from, $to){
 }
 
 function shellExecKill($type, $identifier){
-  $types = [
-      'PID' => '/PID',
-      'NAME' => '/IM'
-  ];
-
-  $command = 'taskkill /F ' . $types[$type] . ' ' . $identifier;
   echo "\nEncerrando processo, por identificador ($type): " . $identifier . "\n";
+
+  if(isWindows()){
+    $types = [
+        'PID' => '/PID',
+        'NAME' => '/IM'
+    ];
+
+    $command = 'taskkill /F ' . $types[$type] . ' ' . $identifier;
+  } else {
+    $command = $type === 'PID'
+      ? 'kill -9 ' . (int) $identifier
+      : "pkill -9 -f 'php -S'";
+  }
+
   shell_exec($command);
 }

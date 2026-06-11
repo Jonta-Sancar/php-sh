@@ -1,4 +1,8 @@
 <?php
+function isWindows(){
+  return PHP_OS_FAMILY === 'Windows';
+}
+
 function adjustParammeters(){
   global $argv, $parammeters;
 
